@@ -5,7 +5,8 @@ var globalSolutions = [];
 /**
  * Affiche les résultats de recherche dans le tableau.
  * Chaque solution est affichée sous la forme "A: nbr, B: nbr ; C: nbr, D: nbr ; ..."
- * et un bouton "Afficher schéma" permet de visualiser le schéma correspondant.
+ * et un bouton "Afficher schéma" permet de visualiser la solution correspondante.
+ * La colonne "Méthode" a été retirée.
  * @param {Array} solutions - Tableau des solutions (chaînes de paires)
  */
 function afficherResultats(solutions) {
@@ -14,7 +15,7 @@ function afficherResultats(solutions) {
   tbody.innerHTML = "";
 
   if (solutions.length === 0) {
-    tbody.innerHTML = "<tr><td colspan='5'>Aucun résultat</td></tr>";
+    tbody.innerHTML = "<tr><td colspan='4'>Aucun résultat</td></tr>";
     return;
   }
 
@@ -34,11 +35,8 @@ function afficherResultats(solutions) {
       }
     });
 
-    // Création de la ligne du tableau
+    // Création de la ligne du tableau (4 colonnes : Engrenages, Rapport obtenu, Écart (%) et Schéma)
     let row = document.createElement("tr");
-
-    let methodCell = document.createElement("td");
-    methodCell.innerText = "Méthode";
 
     let gearsCell = document.createElement("td");
     gearsCell.innerText = gearsText;
@@ -52,10 +50,11 @@ function afficherResultats(solutions) {
     let buttonCell = document.createElement("td");
     let btn = document.createElement("button");
     btn.innerText = "Afficher schéma";
-    btn.onclick = function () { displaySolutionSchematic(index); };
+    btn.onclick = function () {
+      displaySolutionSchematic(index);
+    };
     buttonCell.appendChild(btn);
 
-    row.appendChild(methodCell);
     row.appendChild(gearsCell);
     row.appendChild(ratioCell);
     row.appendChild(errorCell);

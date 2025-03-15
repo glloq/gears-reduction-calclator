@@ -14,7 +14,7 @@ class Engine {
   ) {
     let solutions = [];
     let compteurIterations = 0;
-    const LOG_FREQUENCY = 1000; // Affichage d'un log tous les 1000 itérations
+    const LOG_FREQUENCY = 10000; // Affichage d'un log tous les 10000 itérations
 
     // Fonction récursive asynchrone pour explorer les combinaisons
     async function rechercher(chaine, profondeur, rapportActuel, etageLimite) {

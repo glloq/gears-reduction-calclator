@@ -182,7 +182,7 @@ function drawAdaptiveAssembly(gears) {
     let centerDistance = modValue * (gears[0].teeth + gears[1].teeth) / 2;
     let midX = (currentX + secondX) / 2;
     ctx.fillStyle = "#000";
-    ctx.font = "14px Arial";
+    ctx.font = "10px Arial";
     ctx.textAlign = "center";
     ctx.fillText(`${centerDistance.toFixed(2)} mm`, midX, 15);
   }
@@ -234,7 +234,7 @@ function drawAdaptiveAssembly(gears) {
       ctx.restore();
       
       ctx.fillStyle = "#000";
-      ctx.font = "14px Arial";
+      ctx.font = "10px Arial";
       ctx.textAlign = "center";
       ctx.fillText(`${centerDistance.toFixed(2)} mm`, midX, 15);
     }
