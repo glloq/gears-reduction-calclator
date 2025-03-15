@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recherche d'Engrenages - Rapport de Réduction</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.1/nouislider.min.css">
+  <!-- noUiSlider doit être chargé sans defer -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.1/nouislider.min.js"></script>
+</head>
+<body>
+  <div class="main-container">
+    <!-- Barre latérale (paramètres) -->
+    <div class="sidebar">
+      <div class="rapport-container">
+        <h2>🎯 Rapport cible :</h2>
+		<label>(nombre de tours entrée pour un tour sortie) </label>
+        <input type="number" id="rapport" value="12" step="0.1">
+		<button id="startStopBtn" onclick="lancerRecherche()">🔍 Rechercher</button>
+      </div>
+      <div class="parametres-container">
+        <div class="parametres">
+          <h3>⚙️ Paramètres de Calcul</h3>
+		  <label>Intervalle de précision (%) :</label>
+          <input type="number" id="precision" value="0.1" step="0.1">
+		  
+		  <label>Nombre max d'étages :</label>
+          <input type="number" id="etages" value="4" min="1" max="8">
+		  
+          <label>Dents menante (min/max) :</label>
+          <div id="dent_menante_slider" class="slider"></div>
+          <span>Min: <span id="val_menante_min">10</span></span> | 
+          <span>Max: <span id="val_menante_max">20</span></span>
+    
+         
+          <label>Dents menée (min/max) :</label>
+          <div id="dent_menee_slider" class="slider"></div>
+          <span>Min: <span id="val_menee_min">30</span></span> | 
+          <span>Max: <span id="val_menee_max">50</span></span>
+         
+          
+          
+		  
+          <h3>📊 Options </h3>
+		  
+		  <label>Nombre de résultats à afficher :</label>
+          <input type="number" id="max_solutions" value="10" min="1" max="100">
+		  
+		  <!-- Option pour fixer le nombre de dents du premier engrenage (entrée) -->
+			  <label>Nombre de dents du premier engrenage :</label>
+			  <input type="number" id="dent_menante_fixe" placeholder="Vide pour plage">
+		  
+			<!-- Option pour fixer le nombre de dents du dernier engrenage (sortie) -->
+			  <label>Nombre de dents du dernier engrenage :</label>
+			  <input type="number" id="dent_menee_fixe" placeholder="Vide pour plage">
+			<!-- Option pour afficher ll'entraxe des engrenages dans les schemas -->
+				<label>Module des engrenages :</label>
+				<input type="number" id="module" placeholder="Ex: 2.5">
+          
+          
+        </div>
+      </div>
+    </div>
+    <!-- Zone principale (schéma, barre de progression, résultats) -->
+    <div class="content">
+	  <h1>🔧 Recherche d'Engrenages - Rapport de Réduction</h1>
+
+      <!-- Canvas pour le schéma (hauteur réduite à environ 200px) -->
+      <canvas id="gearCanvas" width="1000" height="150" style="border:1px solid #ccc; margin-bottom: 20px;"></canvas>
+      <div class="progress-container">
+        <div id="progress-bar"></div>
+      </div>
+      <div class="result-container">
+        <h2>📊 Résultats</h2>
+        <p id="status">⏳ En attente...</p>
+        <table>
+          <thead>
+            <tr>
+              <th>Méthode</th>
+              <th>Engrenages</th>
+              <th>Rapport obtenu</th>
+              <th>Écart (%)</th>
+              <th>Schéma</th>
+            </tr>
+          </thead>
+          <tbody id="resultats">
+            <tr><td colspan="5">Aucun résultat</td></tr>
+          </tbody>
+        </table>
+      </div>
+	   
+	   
+	  <div id="logs" class="logs-container"></div>
+    </div>
+  </div>
+
+  <!-- Initialisation des sliders -->
+  <script>
+    function initSliders() {
+      let sliderMenante = document.getElementById('dent_menante_slider');
+      let sliderMenee = document.getElementById('dent_menee_slider');
+
+      noUiSlider.create(sliderMenante, {
+          start: [10, 20],
+          connect: true,
+          range: { 'min': 5, 'max': 30 },
+          step: 1
+      });
+
+      noUiSlider.create(sliderMenee, {
+          start: [30, 50],
+          connect: true,
+          range: { 'min': 15, 'max': 120 },
+          step: 1
+      });
+
+      sliderMenante.noUiSlider.on('update', function(values) {
+          document.getElementById("val_menante_min").innerText = Math.round(values[0]);
+          document.getElementById("val_menante_max").innerText = Math.round(values[1]);
+      });
+
+      sliderMenee.noUiSlider.on('update', function(values) {
+          document.getElementById("val_menee_min").innerText = Math.round(values[0]);
+          document.getElementById("val_menee_max").innerText = Math.round(values[1]);
+      });
+    }
+    document.addEventListener("DOMContentLoaded", initSliders);
+  </script>
+
+  <!-- Inclusion des autres scripts -->
+  <script src="js/main.js" defer></script>
+  <script src="js/Engine.js" defer></script>
+  <script src="js/UI.js" defer></script>
+  <script src="js/schema.js" defer></script>
+</body>
+</html>
