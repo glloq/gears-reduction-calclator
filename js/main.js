@@ -1,6 +1,10 @@
 async function lancerRecherche() {
-  // Avant de lancer le calcul, afficher les instructions
-  drawInitialInstructions();
+  // Afficher les instructions d'aide sur le canvas
+  if (typeof drawInitialInstructions === 'function') {
+    drawInitialInstructions();
+  }
+  // Effacer les logs précédents
+  UI.clearLogs();
 
   const btn = document.getElementById("startStopBtn");
   btn.innerText = "⏳ Calcul en cours...";
@@ -12,7 +16,6 @@ async function lancerRecherche() {
   progressBar.style.display = "block";
   UI.afficherMessageStatus("🟡 Calcul en cours...");
 
-  // Récupération des paramètres (y compris la limite d'itérations, etc.)
   const rapport = parseFloat(document.getElementById("rapport").value);
   const dentMenanteMin = parseInt(document.getElementById("val_menante_min").innerText);
   const dentMenanteMax = parseInt(document.getElementById("val_menante_max").innerText);
@@ -23,7 +26,7 @@ async function lancerRecherche() {
   const maxSolutions = parseInt(document.getElementById("max_solutions").value);
   const maxIterations = parseInt(document.getElementById("max_iterations").value);
 
-  // Récupérer les valeurs optionnelles pour engrenages fixes
+  // Valeurs optionnelles pour engrenages fixes
   const dentMenanteFixeValue = document.getElementById("dent_menante_fixe").value;
   const dentMeneeFixeValue = document.getElementById("dent_menee_fixe").value;
   const dentMenanteFixe = dentMenanteFixeValue.trim() !== "" ? parseInt(dentMenanteFixeValue, 10) : null;

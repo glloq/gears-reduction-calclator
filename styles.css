@@ -11,6 +11,24 @@ h1 {
   color: #333;
   margin: 20px 0;
 }
+
+/* Pour que le canvas prenne 100% de la largeur de son conteneur */
+.content canvas {
+  width: 100%;
+  height: auto; /* La hauteur réelle est définie par l'attribut height en HTML (ici 200) */
+}
+
+/* Zone de logs placée sous le tableau */
+.logs-container {
+  margin-top: 20px;
+  padding: 10px;
+  background: #eef;
+  border: 1px solid #ccd;
+  max-height: 150px;
+  overflow-y: auto;
+  font-size: 0.9em;
+}
+
 /* Zone de logs collapsible */
 .logs-container {
   margin-top: 20px;

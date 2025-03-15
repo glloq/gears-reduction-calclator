@@ -3,13 +3,14 @@
 // Paramètres de base pour le dessin du schéma
 const DEFAULT_FACTOR = 3;    // Facteur d'échelle pour la longueur de l'axe (px par dent)
 const SMALL_GAP = 2;         // Écart minimal entre les axes
-const HORIZ_OFFSET = 0;     // Décalage horizontal additionnel entre paires (optionnel)
+const HORIZ_OFFSET = 0;     // Décalage horizontal additionnel entre paires
 const VERT_GAP = 15;         // Décalage vertical entre les niveaux de paires
 const INITIAL_X = 50;        // Position de départ en X pour l'entrée
 const INITIAL_Y = 20;        // Position de départ en Y pour l'entrée (sera augmenté si module renseigné)
 const RECT_WIDTH = 50;       // Largeur des boîtes "IN"/"OUT"
 const RECT_HEIGHT = 30;      // Hauteur des boîtes "IN"/"OUT"
 const T_HEIGHT = 7;          // Hauteur du trait vertical central ("T")
+const BOTTOM_MARGIN = 10;    // Marge en bas du canvas pour placer IN/OUT
 
 // Récupération du canvas et de son contexte
 const canvas = document.getElementById("gearCanvas");
@@ -17,40 +18,13 @@ const ctx = canvas.getContext("2d");
 ctx.strokeStyle = "#000";
 ctx.lineWidth = 2;
 
-
-
-
-function drawInitialInstructions() {
-  // Effacer le canvas
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  
-  // Configuration du style de texte
-  ctx.fillStyle = "#000";
-  ctx.font = "14px Arial";
-  ctx.textAlign = "center";
-  
-  // Messages d'instructions
-  const msg1 = "Pour obtenir un résultat, limitez le nombre de calculs en";
-  const msg2 = "adaptant les valeurs min/max de dents ou augmentez la limite d'itérations.";
-  const msg3 = "Pour afficher l'entraxe, renseignez le module des engrenages.";
-  
-  // Afficher les messages au centre du canvas
-  const centerX = canvas.width / 2;
-  const centerY = canvas.height / 2;
-  ctx.fillText(msg1, centerX, centerY - 20);
-  ctx.fillText(msg2, centerX, centerY);
-  ctx.fillText(msg3, centerX, centerY + 20);
-}
-
 /**
  * Calcule la longueur de l'axe d'un engrenage en fonction de son nombre de dents.
  * @param {Object} gear - Objet { name: string, teeth: number }.
- * @param {string} type - "odd" ou "even" (pour éventuellement différencier)
+ * @param {string} type - "odd" ou "even"
  * @returns {number} Longueur de l'axe en pixels.
  */
 function getAxisLength(gear, type) {
-  // Ici, on utilise simplement le nombre de dents multiplié par un facteur.
-  // Vous pouvez ajuster la formule selon vos besoins.
   return gear.teeth * DEFAULT_FACTOR;
 }
 
@@ -103,11 +77,11 @@ function drawGear(x, y, length, label, labelPos) {
   ctx.lineTo(x, y + T_HEIGHT);
   ctx.stroke();
 
-  // Label
+  // Label : décalage de 30px en X pour "above"
   ctx.font = "12px Arial";
   ctx.textAlign = "center";
   if(labelPos === "above"){
-    ctx.fillText(label, x, y - 10);
+    ctx.fillText(label, x + 30, y - 10);
   } else {
     ctx.fillText(label, x, y + T_HEIGHT + 15);
   }
@@ -129,17 +103,19 @@ function drawVerticalLink(x, yTop, yBottom) {
 
 /**
  * Dessine une boîte (rectangle) avec un texte.
+ * Permet de préciser une couleur de fond optionnelle.
  * @param {number} centerX Centre horizontal.
  * @param {number} topY Ordonnée du haut du rectangle.
  * @param {number} width Largeur du rectangle.
  * @param {number} height Hauteur du rectangle.
  * @param {string} text Texte à afficher.
+ * @param {string} [fillColor] Couleur de fond optionnelle.
  */
-function drawLabelRectangle(centerX, topY, width, height, text) {
+function drawLabelRectangle(centerX, topY, width, height, text, fillColor) {
   const left = centerX - width / 2;
   ctx.beginPath();
   ctx.rect(left, topY, width, height);
-  ctx.fillStyle = "#ddd";
+  ctx.fillStyle = fillColor || "#ddd";
   ctx.fill();
   ctx.strokeStyle = "#000";
   ctx.stroke();
@@ -147,55 +123,52 @@ function drawLabelRectangle(centerX, topY, width, height, text) {
   ctx.font = "12px Arial";
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.fillText(text, centerX, topY + height/2);
+  ctx.fillText(text, centerX, topY + height / 2);
 }
 
 /**
  * Dessine l'assemblage schématique des engrenages.
- * Si un module est renseigné, on augmente la position initiale verticale de 30,
- * on trace pour la première paire des traits pointillés pour les deux centres jusqu'à y=15,
- * et on affiche l'entraxe sous forme "x mm" en haut du canvas.
- * Pour les paires intermédiaires, seul le trait pointillé pour l'engrenage pair (sortie) est tracé.
- * La distance horizontale entre les centres de chaque paire est calculée en fonction
- * des longueurs d'axes obtenues via getAxisLength().
- *
+ * Pour le premier engrenage, l'axe est prolongé jusqu'au cube "IN".
+ * Pour le dernier, l'axe est prolongé jusqu'au cube "OUT".
+ * Les instructions d'entraxe sont affichées en haut si le module est renseigné.
  * @param {Array} gears Tableau d'objets { name: string, teeth: number }.
  */
 function drawAdaptiveAssembly(gears) {
   // Effacer le canvas
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  const modValue = getGearModule(); // module, si renseigné
-  
-  // Définir la position initiale verticale (ajout de 30 si module est renseigné)
+  const modValue = getGearModule();
+
+  // Position initiale verticale (ajustée si module)
   let startY = INITIAL_Y;
   if (modValue) {
     startY += 30;
   }
   
+  // Définir les positions pour les cubes "IN" et "OUT" alignés en bas du canvas
+  const inOutY = canvas.height - RECT_HEIGHT - BOTTOM_MARGIN;
+
   const n = gears.length;
-  if(n < 2) return; // Au moins deux engrenages nécessaires
-  
+  if (n < 2) return;
+
   // Première paire
   let currentX = INITIAL_X;
   let currentY = startY;
   
-  // Calculer la longueur de l'axe pour le premier engrenage (type "odd")
   const axisOdd1 = getAxisLength(gears[0], "odd");
-  // Dessiner le premier engrenage (entrée)
+  // Dessiner le premier engrenage
   const bottomEntry = drawGear(currentX, currentY, axisOdd1, `${gears[0].name}: ${gears[0].teeth}`, "above");
   
-  // Calculer la longueur de l'axe pour le second engrenage (type "even")
   const axisEven1 = getAxisLength(gears[1], "even");
-  // Calculer la position du centre du second engrenage en fonction de l'axe du premier et du second
   const secondX = currentX + (axisOdd1 / 2) + SMALL_GAP + (axisEven1 / 2);
   // Dessiner le second engrenage
   const bottomSecond = drawGear(secondX, currentY, axisEven1, `${gears[1].name}: ${gears[1].teeth}`, "above");
   
-  if(modValue) {
-    // Pour la première paire, tracer des traits pointillés pour les deux centres jusqu'à y=15
+  // Si module renseigné, afficher l'entraxe pour la première paire en haut du canvas
+  if (modValue) {
     ctx.save();
     ctx.strokeStyle = "gray";
     ctx.setLineDash([5, 5]);
+    // Pour la première paire, tracer une ligne pointillée depuis chaque centre jusqu'à y=15
     ctx.beginPath();
     ctx.moveTo(currentX, currentY);
     ctx.lineTo(currentX, 15);
@@ -206,7 +179,6 @@ function drawAdaptiveAssembly(gears) {
     ctx.stroke();
     ctx.restore();
     
-    // Calculer et afficher l'entraxe pour la première paire
     let centerDistance = modValue * (gears[0].teeth + gears[1].teeth) / 2;
     let midX = (currentX + secondX) / 2;
     ctx.fillStyle = "#000";
@@ -215,24 +187,30 @@ function drawAdaptiveAssembly(gears) {
     ctx.fillText(`${centerDistance.toFixed(2)} mm`, midX, 15);
   }
   
-  // Afficher la boîte "IN" sous le premier engrenage
-  drawLabelRectangle(currentX, bottomEntry, RECT_WIDTH, RECT_HEIGHT, "IN");
+  // Étendre l'axe du premier engrenage jusqu'au cube "IN"
+  ctx.beginPath();
+  ctx.moveTo(currentX, currentY);
+  ctx.lineTo(currentX, inOutY);
+  ctx.stroke();
+  // Dessiner le cube "IN" en bas, aligné avec le centre du premier engrenage
+  drawLabelRectangle(currentX, inOutY, RECT_WIDTH, RECT_HEIGHT, "IN", "#ccffcc");
   
-  if(n === 2) {
-    // Si seulement deux engrenages, afficher "OUT" sous le second et terminer.
-    drawLabelRectangle(secondX, bottomSecond, RECT_WIDTH, RECT_HEIGHT, "OUT");
+  if (n === 2) {
+    // Pour seulement deux engrenages, étendre l'axe du second et dessiner "OUT"
+    ctx.beginPath();
+    ctx.moveTo(secondX, currentY);
+    ctx.lineTo(secondX, inOutY);
+    ctx.stroke();
+    drawLabelRectangle(secondX, inOutY, RECT_WIDTH, RECT_HEIGHT, "OUT", "#ffcccc");
     return;
   }
   
   // Pour les paires intermédiaires
   currentX = secondX;
-  for(let i = 2; i < n; i += 2) {
-    // Calculer la longueur d'axe pour la paire actuelle
+  for (let i = 2; i < n; i += 2) {
     const axisOdd = getAxisLength(gears[i], "odd");
     const axisEven = getAxisLength(gears[i+1], "even");
-    
-    // Position horizontale du centre de la nouvelle paire:
-    // On part du centre précédent, on ajoute la moitié de l'axe impair, un SMALL_GAP, puis la moitié de l'axe pair.
+    // Calculer la nouvelle position horizontale en fonction des axes
     const newX = currentX + (axisOdd / 2) + SMALL_GAP + (axisEven / 2) + HORIZ_OFFSET;
     
     let gearBottomY = currentY + VERT_GAP;
@@ -242,13 +220,13 @@ function drawAdaptiveAssembly(gears) {
     // Dessiner le second engrenage de la paire (pair)
     const bottomGear2 = drawGear(newX, gearBottomY, axisEven, `${gears[i+1].name}: ${gears[i+1].teeth}`, "above");
     
-    if(modValue) {
+    if (modValue) {
       let centerDistance = modValue * (gears[i].teeth + gears[i+1].teeth) / 2;
       let midX = (currentX + newX) / 2;
       ctx.save();
       ctx.strokeStyle = "gray";
       ctx.setLineDash([5, 5]);
-      // Pour les paires intermédiaires, tracer uniquement pour l'engrenage pair (newX)
+      // Pour les paires intermédiaires, tracer la ligne pointillée uniquement pour l'engrenage pair
       ctx.beginPath();
       ctx.moveTo(newX, gearBottomY);
       ctx.lineTo(newX, 15);
@@ -261,19 +239,22 @@ function drawAdaptiveAssembly(gears) {
       ctx.fillText(`${centerDistance.toFixed(2)} mm`, midX, 15);
     }
     
-    // Mise à jour pour la prochaine paire
     currentX = newX;
     currentY = gearBottomY;
   }
   
-  // Afficher la boîte "OUT" sous le dernier engrenage
-  drawLabelRectangle(currentX, currentY + T_HEIGHT, RECT_WIDTH, RECT_HEIGHT, "OUT");
+  // Étendre l'axe du dernier engrenage jusqu'au cube "OUT"
+  ctx.beginPath();
+  ctx.moveTo(currentX, currentY);
+  ctx.lineTo(currentX, inOutY);
+  ctx.stroke();
+  drawLabelRectangle(currentX, inOutY, RECT_WIDTH, RECT_HEIGHT, "OUT", "#ADD8E6");
 }
 
 /**
  * Convertit une solution (tableau de paires) en tableau d'objets engrenages.
- * Chaque engrenage reçoit un nom (A, B, C, …) et le nombre de dents correspondant.
- * @param {Array} solution Chaîne de paires, par exemple [[20, 30], [15, 25]].
+ * Chaque engrenage reçoit un nom (A, B, C, …) et son nombre de dents.
+ * @param {Array} solution Exemple: [[20, 30], [15, 25]]
  * @returns {Array} Tableau d'objets { name: string, teeth: number }.
  */
 function convertSolutionToGears(solution) {

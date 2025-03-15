@@ -5,7 +5,7 @@ var globalSolutions = [];
 /**
  * Affiche les résultats de recherche dans le tableau.
  * Chaque solution est affichée sous la forme "A: nbr, B: nbr ; C: nbr, D: nbr ; ..."
- * et un bouton "Afficher schéma" permet de visualiser la solution correspondante.
+ * et un bouton "Afficher schéma" permet de visualiser le schéma correspondant.
  * @param {Array} solutions - Tableau des solutions (chaînes de paires)
  */
 function afficherResultats(solutions) {
@@ -23,8 +23,6 @@ function afficherResultats(solutions) {
     let ratio = solution.reduce((acc, [m, n]) => acc * (n / m), 1);
     let target = parseFloat(document.getElementById("rapport").value);
     let error = Math.abs((ratio - target) / target * 100);
-
-    // Construction du texte des engrenages au format "A: nbr, B: nbr ; ..."
     const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     let gearsText = "";
     solution.forEach((pair, i) => {
@@ -54,9 +52,7 @@ function afficherResultats(solutions) {
     let buttonCell = document.createElement("td");
     let btn = document.createElement("button");
     btn.innerText = "Afficher schéma";
-    btn.onclick = function () {
-      displaySolutionSchematic(index);
-    };
+    btn.onclick = function () { displaySolutionSchematic(index); };
     buttonCell.appendChild(btn);
 
     row.appendChild(methodCell);
@@ -83,7 +79,6 @@ function afficherMessageStatus(message) {
 
 /**
  * Ajoute un message de log dans la div dédiée aux logs.
- * Les logs sont affichés sous le tableau des résultats.
  * @param {string} message - Le message de log.
  */
 function ajouterLog(message) {
@@ -96,9 +91,35 @@ function ajouterLog(message) {
   }
 }
 
-// Exposer les fonctions globalement
+/**
+ * Efface l'intégralité des logs.
+ */
+function clearLogs() {
+  const logDiv = document.getElementById("logs");
+  if (logDiv) {
+    logDiv.innerHTML = "";
+  }
+}
+
+/**
+ * Bascule l'affichage de la zone des logs.
+ */
+function toggleLogs() {
+  const logsDiv = document.getElementById("logs");
+  const header = document.querySelector(".logs-header");
+  if (logsDiv.style.display === "none" || logsDiv.style.display === "") {
+    logsDiv.style.display = "block";
+    header.innerText = "Logs ▼";
+  } else {
+    logsDiv.style.display = "none";
+    header.innerText = "Logs ►";
+  }
+}
+
 window.UI = {
   afficherResultats: afficherResultats,
   afficherMessageStatus: afficherMessageStatus,
-  ajouterLog: ajouterLog
+  ajouterLog: ajouterLog,
+  toggleLogs: toggleLogs,
+  clearLogs: clearLogs
 };
