@@ -1,6 +1,8 @@
 # Calculateur d'Engrenages – Rapport de Réduction
 
 Ce projet est une application web permettant de rechercher des combinaisons d'engrenages afin d'obtenir un rapport de réduction cible. 
+![schema principe](https://github.com/glloq/gears-reduction-calculator/blob/main/exemple%20interface.png)
+
 
 L'utilisateur peut définir les paramètres de calcul via une interface comprenant des sliders et des champs de saisie pour spécifier : 
 - les plages de dents
