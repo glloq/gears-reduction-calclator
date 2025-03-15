@@ -17,6 +17,31 @@ const ctx = canvas.getContext("2d");
 ctx.strokeStyle = "#000";
 ctx.lineWidth = 2;
 
+
+
+
+function drawInitialInstructions() {
+  // Effacer le canvas
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  
+  // Configuration du style de texte
+  ctx.fillStyle = "#000";
+  ctx.font = "14px Arial";
+  ctx.textAlign = "center";
+  
+  // Messages d'instructions
+  const msg1 = "Pour obtenir un résultat, limitez le nombre de calculs en";
+  const msg2 = "adaptant les valeurs min/max de dents ou augmentez la limite d'itérations.";
+  const msg3 = "Pour afficher l'entraxe, renseignez le module des engrenages.";
+  
+  // Afficher les messages au centre du canvas
+  const centerX = canvas.width / 2;
+  const centerY = canvas.height / 2;
+  ctx.fillText(msg1, centerX, centerY - 20);
+  ctx.fillText(msg2, centerX, centerY);
+  ctx.fillText(msg3, centerX, centerY + 20);
+}
+
 /**
  * Calcule la longueur de l'axe d'un engrenage en fonction de son nombre de dents.
  * @param {Object} gear - Objet { name: string, teeth: number }.

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Recherche d'Engrenages - Rapport de Réduction</title>
+  <title>Recherche train d'Engrenages - Rapport de Réduction</title>
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.1/nouislider.min.css">
   <!-- noUiSlider doit être chargé sans defer -->
@@ -15,59 +15,49 @@
     <div class="sidebar">
       <div class="rapport-container">
         <h2>🎯 Rapport cible :</h2>
-		<label>(nombre de tours entrée pour un tour sortie) </label>
+        <label>(nombre de tours entrée pour un tour sortie)</label>
         <input type="number" id="rapport" value="12" step="0.1">
-		<button id="startStopBtn" onclick="lancerRecherche()">🔍 Rechercher</button>
+        <button id="startStopBtn" onclick="lancerRecherche()">🔍 Rechercher</button>
       </div>
       <div class="parametres-container">
         <div class="parametres">
           <h3>⚙️ Paramètres de Calcul</h3>
-		  <label>Intervalle de précision (%) :</label>
+          <label>Intervalle de précision (%) :</label>
           <input type="number" id="precision" value="0.1" step="0.1">
-		  
-		  <label>Nombre max d'étages :</label>
+          <label>Nombre max d'étages :</label>
           <input type="number" id="etages" value="4" min="1" max="8">
-		  
           <label>Dents menante (min/max) :</label>
           <div id="dent_menante_slider" class="slider"></div>
           <span>Min: <span id="val_menante_min">10</span></span> | 
-          <span>Max: <span id="val_menante_max">20</span></span>
-    
-         
+          <span>Max: <span id="val_menante_max">30</span></span>
           <label>Dents menée (min/max) :</label>
           <div id="dent_menee_slider" class="slider"></div>
-          <span>Min: <span id="val_menee_min">30</span></span> | 
+          <span>Min: <span id="val_menee_min">20</span></span> | 
           <span>Max: <span id="val_menee_max">50</span></span>
-         
-          
-          
-		  
           <h3>📊 Options </h3>
-		  
-		  <label>Nombre de résultats à afficher :</label>
+          <label>Nombre de résultats à afficher :</label>
           <input type="number" id="max_solutions" value="10" min="1" max="100">
-		  
-		  <!-- Option pour fixer le nombre de dents du premier engrenage (entrée) -->
-			  <label>Nombre de dents du premier engrenage :</label>
-			  <input type="number" id="dent_menante_fixe" placeholder="Vide pour plage">
-		  
-			<!-- Option pour fixer le nombre de dents du dernier engrenage (sortie) -->
-			  <label>Nombre de dents du dernier engrenage :</label>
-			  <input type="number" id="dent_menee_fixe" placeholder="Vide pour plage">
-			<!-- Option pour afficher ll'entraxe des engrenages dans les schemas -->
-				<label>Module des engrenages :</label>
-				<input type="number" id="module" placeholder="Ex: 2.5">
-          
-          
+          <!-- Limite d'itérations définie par l'utilisateur -->
+          <label>Limite d'itérations :</label>
+          <input type="number" id="max_iterations" value="50000" min="1000" max="1000000" step="1000">
+          <!-- Option pour fixer le nombre de dents du premier engrenage (entrée) -->
+          <label>Nombre de dents du premier engrenage :</label>
+          <input type="number" id="dent_menante_fixe" placeholder="Vide pour plage">
+          <!-- Option pour fixer le nombre de dents du dernier engrenage (sortie) -->
+          <label>Nombre de dents du dernier engrenage :</label>
+          <input type="number" id="dent_menee_fixe" placeholder="Vide pour plage">
+          <!-- Option pour afficher l'entraxe dans les schémas -->
+          <label>Module des engrenages :</label>
+          <input type="number" id="module" placeholder="Ex: 2.5">
         </div>
       </div>
+     
     </div>
     <!-- Zone principale (schéma, barre de progression, résultats) -->
     <div class="content">
-	  <h1>🔧 Recherche d'Engrenages - Rapport de Réduction</h1>
-
-      <!-- Canvas pour le schéma (hauteur réduite à environ 200px) -->
-      <canvas id="gearCanvas" width="1000" height="150" style="border:1px solid #ccc; margin-bottom: 20px;"></canvas>
+      <h1>🔧 Recherche train d'engrenages - Rapport de Réduction</h1>
+      <!-- Canvas pour le schéma (hauteur réduite à environ 150px) -->
+      <canvas id="gearCanvas" width="600" height="150" style="border:1px solid #ccc; margin-bottom: 20px;"></canvas>
       <div class="progress-container">
         <div id="progress-bar"></div>
       </div>
@@ -88,10 +78,12 @@
             <tr><td colspan="5">Aucun résultat</td></tr>
           </tbody>
         </table>
+		 <!-- Menu collapsible pour les logs -->
+      <div id="logs-container" class="logs-container">
+        <h3 class="logs-header" onclick="UI.toggleLogs()">Logs ▼</h3>
+        <div id="logs" class="logs-content"></div>
       </div>
-	   
-	   
-	  <div id="logs" class="logs-container"></div>
+      </div>
     </div>
   </div>
 
@@ -102,16 +94,16 @@
       let sliderMenee = document.getElementById('dent_menee_slider');
 
       noUiSlider.create(sliderMenante, {
-          start: [10, 20],
+          start: [10, 30],
           connect: true,
-          range: { 'min': 5, 'max': 30 },
+          range: { 'min': 5, 'max': 80 },
           step: 1
       });
 
       noUiSlider.create(sliderMenee, {
-          start: [30, 50],
+          start: [20, 50],
           connect: true,
-          range: { 'min': 15, 'max': 120 },
+          range: { 'min': 10, 'max': 120 },
           step: 1
       });
 
